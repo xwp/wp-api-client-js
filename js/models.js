@@ -44,7 +44,7 @@
 		 * @returns {*}.
 		 */
 		parse: function( response ) {
-			var timestamp;
+			var timestamp, authorAttributes;
 
 			// Parse dates into native Date objects.
 			_.each( parseableDates, function( key ) {
@@ -57,8 +57,14 @@
 			});
 
 			// Parse the author into a User object.
-			if ( 'undefined' !== typeof response.author ) {
-				response.author = new wp.api.models.User( response.author );
+			if ( 'undefined' !== typeof response.author && ! ( response.author instanceof wp.api.models.User ) ) {
+				if ( response._embedded && response._embedded.author ) {
+					authorAttributes = _.findWhere( response._embedded.author, { id: response.author } );
+				}
+				if ( ! authorAttributes ) {
+					authorAttributes = { id: response.author };
+				}
+				response.author = new wp.api.models.User( authorAttributes );
 			}
 
 			return response;
