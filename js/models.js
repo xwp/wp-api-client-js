@@ -33,6 +33,11 @@
 				}
 			});
 
+			// Convert author User object back into ID.
+			if ( attributes.author instanceof wp.api.models.User ) {
+				attributes.author = attributes.author.id;
+			}
+
 			return attributes;
 		},
 
