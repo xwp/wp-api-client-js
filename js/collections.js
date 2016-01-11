@@ -12,6 +12,10 @@
 
 			/**
 			 * Setup default state.
+			 *
+			 * @param {Backbone.Model[]} [models]
+			 * @param {object} [options]
+			 * @param {object} [options.data]
 			 */
 			initialize: function( models, options ) {
 				this.state = {
@@ -24,7 +28,12 @@
 					this.parent = '';
 				} else {
 					this.parent = options.parent;
+
+					// Allow initial data to be specified for a bootstrapped collection.
+					_.extend( this.state.data, options.data );
 				}
+
+				this._initSortOnChange();
 			},
 
 			/**
@@ -71,6 +80,8 @@
 						self.state.currentPage = options.data.page - 1;
 					}
 
+					self._initSortOnChange();
+
 					success = options.success;
 					options.success = function( data, textStatus, request ) {
 						self.state.totalPages = parseInt( request.getResponseHeader( 'x-wp-totalpages' ), 10 );
@@ -92,10 +103,69 @@
 			},
 
 			/**
+			 * Initialize re-sort when a model in the collection changes or when a
+			 * sync happens, if the collection has an orderBy data.
+			 *
+			 * @private
+			 * @returns {boolean} False if already initialized or if orderBy data not present.
+			 */
+			_initSortOnChange: function() {
+				var collection = this;
+				if ( collection._initializedSortOnChange || ! collection.state.data.orderby ) {
+					return false;
+				}
+
+				if ( ! collection.comparator ) {
+					collection.comparator = collection.defaultComparator;
+				}
+				collection.on( 'sync change', function() {
+					collection.sort();
+				} );
+				collection.sort();
+
+				collection._initializedSortOnChange = true;
+				return true;
+			},
+
+			/**
+			 * Compare two models' properties according to the queried orderby param.
+			 *
+			 * @param {Backbone.Model} a
+			 * @param {Backbone.Model} b
+			 * @returns {number}
+			 */
+			defaultComparator: function( a, b ) {
+				var collection = this, aValue, bValue, result;
+
+				if ( ! collection.state.data.orderby ) {
+					throw new Error( 'Unable to sort collection without orderby query param provided.' );
+				}
+
+				aValue = a.get( collection.state.data.orderby );
+				bValue = b.get( collection.state.data.orderby );
+
+				if ( _.isUndefined( aValue ) || _.isUndefined( bValue ) ) {
+					throw new Error( 'Model lacks specified orderby field: ' + collection.state.data.orderby );
+				}
+
+				if ( aValue.valueOf() === bValue.valueOf() ) {
+					result = 0;
+				} else {
+					result = ( aValue.valueOf() < bValue.valueOf() ? -1 : 1 );
+				}
+				if ( 'desc' === collection.state.data.order ) {
+					result *= -1;
+				}
+				return result;
+			},
+
+			/**
 			 * Fetches the next page of objects if a new page exists.
 			 *
-			 * @param {data: {page}} options.
-			 * @returns {*}.
+			 * @param {object} [options]
+			 * @param {object} [options.data]
+			 * @param {number} [options.data.page]
+			 * @returns {*}
 			 */
 			more: function( options ) {
 				options = options || {};
