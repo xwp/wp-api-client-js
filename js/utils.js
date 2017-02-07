@@ -228,8 +228,15 @@
 		// If we didn’t have an embedded getModel, fetch the getModel data.
 		if ( ! getModel.get( embedCheckField ) ) {
 			getModel.fetch( {
-				success: function( getModel ) {
-					deferred.resolve( getModel );
+				success: function( model ) {
+					var updatedEmbeddeds = _.clone( parentModel.get( '_embedded' ) || {} );
+					if ( ! updatedEmbeddeds[ embedSourcePoint ] ) {
+						updatedEmbeddeds[ embedSourcePoint ] = [];
+					}
+					updatedEmbeddeds[ embedSourcePoint ].push( model.attributes );
+					parentModel.set( '_embedded', updatedEmbeddeds );
+
+					deferred.resolve( model );
 				},
 				error: function( getModel, response ) {
 					deferred.reject( response );
