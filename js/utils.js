@@ -339,8 +339,8 @@
 	/**
 	 * Add mixins and helpers to models depending on their defaults.
 	 *
-	 * @param {Backbone Model} model          The model to attach helpers and mixins to.
-	 * @param {string}         modelClassName The classname of the constructed model.
+	 * @param {Backbone.Model} model          The model to attach helpers and mixins to.
+	 * @param {string}         modelClassName The class name of the constructed model.
 	 * @param {Object} 	       loadingObjects An object containing the models and collections we are building.
 	 */
 	wp.api.utils.addMixinsAndHelpers = function( model, modelClassName, loadingObjects ) {
@@ -361,7 +361,7 @@
 			 * to or from the server. For example, a date stored as `2015-12-27T21:22:24` on the server
 			 * gets expanded to `Sun Dec 27 2015 14:22:24 GMT-0700 (MST)` when the model is fetched.
 			 *
-			 * @type {{toJSON: toJSON, parse: parse}}.
+			 * @type {{setDate: setDate, getDate: getDate}}.
 			 */
 			TimeStampedMixin = {
 
@@ -375,7 +375,7 @@
 				 * @param {string} field  The date field to set. One of 'date', 'date_gmt', 'date_modified'
 				 *                        or 'date_modified_gmt'. Optional, defaults to 'date'.
 				 */
-				setDate: function( date, field ) {
+				setDate: function setDate( date, field ) {
 					var theField = field || 'date';
 
 					// Don't alter non parsable date fields.
@@ -395,7 +395,7 @@
 				 * @param {string} field  The date field to set. One of 'date', 'date_gmt', 'date_modified'
 				 *                        or 'date_modified_gmt'. Optional, defaults to 'date'.
 				 */
-				getDate: function( field ) {
+				getDate: function getDate( field ) {
 					var theField   = field || 'date',
 						theISODate = this.get( theField );
 
@@ -409,7 +409,7 @@
 			},
 
 			/**
-			 * Add a helper funtion to handle post Meta.
+			 * Add a helper function to handle post Meta.
 			 */
 			MetaMixin = {
 				getMeta: function() {
@@ -418,7 +418,7 @@
 			},
 
 			/**
-			 * Add a helper funtion to handle post Revisions.
+			 * Add a helper function to handle post Revisions.
 			 */
 			RevisionsMixin = {
 				getRevisions: function() {
@@ -427,7 +427,7 @@
 			},
 
 			/**
-			 * Add a helper funtion to handle post Tags.
+			 * Add a helper function to handle post Tags.
 			 */
 			TagsMixin = {
 
@@ -511,7 +511,7 @@
 			},
 
 			/**
-			 * Add a helper funtion to handle post Categories.
+			 * Add a helper function to handle post Categories.
 			 */
 			CategoriesMixin = {
 
